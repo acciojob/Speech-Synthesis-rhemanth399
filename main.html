@@ -4,60 +4,47 @@
     <title>Text-to-Speech Application</title>
   </head>
   <body>
-    <div>
-      <label for="text-input">Enter text to speak:</label>
-      <textarea id="text-input"></textarea>
-    </div>
-    <div>
-      <label for="voice-select">Select a voice:</label>
-      <select id="voice-select"></select>
-    </div>
-    <div>
-      <button id="start-button">Start</button>
-      <button id="stop-button">Stop</button>
-    </div>
+    <input type="text" id="text-input">
+    <button id="start-btn">Start</button>
+    <select id="voice-select"></select>
+    <button id="stop-btn">Stop</button>
     <script>
-      // Create a new SpeechSynthesisUtterance object
-      var utterance = new SpeechSynthesisUtterance();
+      
+      
+      
+      let stop_btn=document.getElementById('stop-btn')
+      const input = document.getElementById("text-input");
+const voiceSelect = document.getElementById("voice-select");
+const speakButton = document.getElementById("start-btn");
 
-      // Get the dropdown element and add event listener for when the value changes
-      var voiceSelect = document.getElementById("voice-select");
-      voiceSelect.addEventListener("change", setVoice);
+function populateVoiceList() {
+  const voices = speechSynthesis.getVoices();
+  for (let i = 0; i < voices.length; i++) {
+    const option = document.createElement("option");
+    option.textContent = voices[i].name + " (" + voices[i].lang + ")";
+    option.setAttribute("data-lang", voices[i].lang);
+    option.setAttribute("data-name", voices[i].name);
+    voiceSelect.appendChild(option);
+  }
+}
 
-      // Get the start button element and add event listener for when it's clicked
-      var startButton = document.getElementById("start-button");
-      startButton.addEventListener("click", startSpeaking);
+populateVoiceList();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = populateVoiceList;
+}
 
-      // Get the stop button element and add eventListener for when it's clicked
-      var stopButton = document.getElementById("stop-button");
-      stopButton.addEventListener("click", stopSpeaking);
+speakButton.addEventListener("click", () => {
+  const utterance = new SpeechSynthesisUtterance(input.value);
+  const selectedOption = voiceSelect.selectedOptions[0];
+  utterance.voice = speechSynthesis.getVoices().find(voice => voice.name === selectedOption.getAttribute('data-name'));
+  speechSynthesis.speak(utterance);
+});
 
-      // Function to set the voice when a new option is selected from the dropdown
-      function setVoice() {
-        utterance.voice = speechSynthesis.getVoices().filter(function(voice) {
-          return voice.name === voiceSelect.value;
-        })[0];
+ stop_btn.addEventListener('click',stopss)
+      function stopss()
+      {
+        speechSynthesis.pause();
       }
-
-      // Function to start speaking
-      function startSpeaking() {
-        var text = document.getElementById("text-input").value;
-        utterance.text = text;
-        speechSynthesis.speak(utterance);
-      }
-
-      // Function to stop speaking
-      function stopSpeaking() {
-        speechSynthesis.cancel();
-      }
-
-    // Populate the dropdown with the available voices
-    speechSynthesis.getVoices().forEach(function(voice) {
-      var option = document.createElement("option");
-      option.text = voice.name;
-      option.value = voice.name;
-      voiceSelect.appendChild(option);
-    });
-    </script>
+      </script>
   </body>
 </html>
